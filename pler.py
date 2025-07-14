@@ -5,7 +5,7 @@ from telethon.tl.types import ChannelParticipantAdmin
 from telethon.tl.types import ChannelParticipantCreator
 from telethon.tl.functions.channels import GetParticipantRequest
 from telethon.errors import UserNotParticipantError
-from config import *
+from config import API_ID, API_HASH, TOKEN
 
 logging.basicConfig(
     level=logging.INFO,
@@ -73,7 +73,7 @@ async def mentionall(event):
   elif event.is_reply:
     mode = "balas"
     msg = await event.get_reply_message()
-    if msg == None:
+    if msg is None:
         return await event.respond("𝙨𝙞 𝙖𝙣𝙟𝙚𝙣𝙜 𝙙𝙞𝙗𝙞𝙡𝙖𝙣𝙜 𝙠𝙖𝙨𝙞 𝙥𝙚𝙨𝙖𝙣 𝙞𝙙𝙞𝙤𝙩 𝙗𝙚𝙩 𝙗𝙤𝙘𝙖𝙝 𝙚𝙩𝙙𝙖𝙝")
   else:
     return await event.respond("𝙨𝙞 𝙖𝙣𝙟𝙚𝙣𝙜 𝙙𝙞𝙗𝙞𝙡𝙖𝙣𝙜 𝙠𝙖𝙨𝙞 𝙥𝙚𝙨𝙖𝙣 𝙞𝙙𝙞𝙤𝙩 𝙗𝙚𝙩 𝙗𝙤𝙘𝙖𝙝 𝙚𝙩𝙙𝙖𝙝")
@@ -82,13 +82,13 @@ async def mentionall(event):
   usrnum = 0
   usrtxt = ''
   async for usr in kntl.iter_participants(chat_id):
-    if not chat_id in spam_chats:
+    if not chat_id or chat_id not in spam_chats:
       break
     usrnum += 1
     usrtxt += f"🀄︎ [{usr.first_name}](tg://user?id={usr.id})\n"
     if usrnum == 5:
       if mode == "teks":
-        txt = f"{usrtxt}\n\n{msg}"
+        txt = f"{msg}\n\n{usrtxt}"
         await kntl.send_message(chat_id, txt)
       elif mode == "balas":
         await msg.reply(usrtxt)
@@ -97,17 +97,19 @@ async def mentionall(event):
       usrtxt = ''
   try:
     spam_chats.remove(chat_id)
-  except:
+  except Exception as e:
+    print(f"Error: {e}")
     pass
 
 @kntl.on(events.NewMessage(pattern="^/cancel$"))
 async def cancel_spam(event):
-  if not event.chat_id in spam_chats:
+  if not event.chat_id or event.chat_id not in spam_chats:
     return await event.respond('𝙚𝙝 𝙢𝙪𝙠𝙖 𝙖𝙣𝙘𝙪𝙧 𝙤𝙧𝙖𝙣𝙜 𝙜𝙖𝙙𝙖 𝙩𝙖𝙜 𝙖𝙡𝙡 𝙜𝙤𝙗𝙡𝙤𝙠')
   else:
     try:
       spam_chats.remove(event.chat_id)
-    except:
+    except Exception as e:
+      print(f"Error: {e}")
       pass
     return await event.respond('𝙞𝙮𝙖 𝙢𝙪𝙠𝙖 𝙖𝙣𝙘𝙪𝙧 𝙣𝙞 𝙜𝙪𝙖 𝙨𝙩𝙤𝙥𝙞𝙣')
 
