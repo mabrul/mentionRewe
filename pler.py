@@ -49,17 +49,21 @@ async def mention_all_handler(event):
         is_admin = False
 
     if not is_admin:
-        return await event.respond("𝗟𝘂 𝗯𝘂𝗸𝗮𝗻 𝗮𝗱𝗺𝗶𝗻 𝗴𝗲𝗺𝗶𝗻𝗶 𝗯𝗮𝗻𝗴 𝗯𝘂𝗴")
+        return await event.respond("𝗟𝘂 𝗯𝘂𝗸𝗮𝗻 𝗮𝗱𝗺𝗶𝗻 𝗯𝗮𝗻𝗴")
 
     msg_text = event.pattern_match.group(1)
-    is_reply = event.is_reply
+    message_text = None
 
-    if not msg_text and not is_reply:
-        return await event.respond("𝗠𝗶𝗻𝗶𝗺𝗮𝗹 𝗸𝗮𝘀𝗶𝗵 𝗽𝗲𝘀𝗮𝗻 𝗮𝘁𝗮𝘂 𝗯𝗮𝗹𝗮𝘀𝗶𝗻 𝗽𝗲𝘀𝗮𝗻")
-
-    message = msg_text if msg_text else await event.get_reply_message()
-    if message is None:
-        return await event.respond("𝗘𝗵 𝗶𝘁𝘂 𝗽𝗲𝘀𝗮𝗻𝗻𝘆𝗮 𝗺𝗮𝗻𝗮 𝗮𝘀𝘂")
+    if msg_text:
+        message_text = msg_text
+    elif event.is_reply:
+        replied = await event.get_reply_message()
+        if replied and replied.text:
+            message_text = replied.text
+        else:
+            return await event.respond("𝗣𝗲𝘀𝗮𝗻 𝗯𝗮𝗹𝗮𝘀𝗮𝗻𝗻𝘆𝗮 𝗴𝗮 𝗮𝗱𝗮 𝘁𝗲𝘅𝘁 𝗯𝗮𝗻𝗴")
+    else:
+        return await event.respond("𝗠𝗶𝗻𝗶𝗺𝗮𝗹 𝗸𝗮𝘀𝗶𝗵 𝗽𝗲𝘀𝗮𝗻 𝗮𝘁𝗮𝘂 𝗯𝗮𝗹𝗮𝘀 𝗽𝗲𝘀𝗮𝗻")
 
     spam_chats.add(event.chat_id)
     user_count = 0
@@ -72,7 +76,7 @@ async def mention_all_handler(event):
         mention_text += f"🀄︎ [{user.first_name}](tg://user?id={user.id})\n"
         if user_count == 5:
             try:
-                await event.reply(f"{message}\n\n{mention_text}" if msg_text else mention_text)
+                await event.respond(f"{message_text}\n\n{mention_text}")
             except Exception as err:
                 LOGGER.error(f"Failed to send message: {err}")
             await asyncio.sleep(2)
